@@ -30,11 +30,11 @@ var (
 )
 
 type Logger interface {
-	debug(logStr string)
-	info(logStr string)
-	warning(logStr string)
-	error(logStr string)
-	critical(logStr string)
+	Debug(format string, param ...interface{})
+	Info(format string, param ...interface{})
+	Warning(format string, param ...interface{})
+	Error(format string, param ...interface{})
+	Critical(format string, param ...interface{})
 }
 
 type SimpleLogger struct {
@@ -108,23 +108,28 @@ func GetSimpleLogger(name string) SimpleLogger {
 	return SimpleLogger{name}
 }
 
-func (logger *SimpleLogger) Debug(logStr string) {
+func (logger *SimpleLogger) Debug(format string, param ...interface{}) {
+	logStr := fmt.Sprintf(format, param...)
 	add_log(logger.name, "[DEBUG]", logStr)
 }
 
-func (logger *SimpleLogger) Info(logStr string) {
+func (logger *SimpleLogger) Info(format string, param ...interface{}) {
+	logStr := fmt.Sprintf(format, param...)
 	add_log(logger.name, "[INFO]", logStr)
 }
 
-func (logger *SimpleLogger) Warning(logStr string) {
+func (logger *SimpleLogger) Warning(format string, param ...interface{}) {
+	logStr := fmt.Sprintf(format, param...)
 	add_log(logger.name, "[WARNING]", logStr)
 }
 
-func (logger *SimpleLogger) Error(logStr string) {
+func (logger *SimpleLogger) Error(format string, param ...interface{}) {
+	logStr := fmt.Sprintf(format, param...)
 	add_log(logger.name, "[ERROR]", logStr)
 }
 
-func (logger *SimpleLogger) Critical(logStr string) {
+func (logger *SimpleLogger) Critical(format string, param ...interface{}) {
+	logStr := fmt.Sprintf(format, param...)
 	add_log(logger.name, "[CRITICAL]", logStr)
 
 }
