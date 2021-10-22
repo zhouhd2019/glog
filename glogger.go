@@ -9,6 +9,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -18,6 +19,9 @@ const MAX_LOG_FILE_SIZE = 1024 * 1024
 var (
 	logFilePath string
 	logFileName string
+
+	inited    bool
+	initMutex sync.Mutex
 
 	logFile   *os.File
 	logWriter *bufio.Writer
@@ -46,7 +50,14 @@ type SimpleLogger struct {
 //	If file exist, clear it
 //	Try to create new file on day passed Or file too large
 func InitLoggerSystem(filePath string, fileName string) (context.CancelFunc, error) {
-	CloseLoggerSystem()
+	if inited {
+		return nil, errors.New("LoggerSystem Inited Before")
+	}
+	initMutex.Lock()
+	if inited {
+		return nil, errors.New("LoggerSystem Inited Before")
+	}
+	defer initMutex.Unlock()
 
 	logFilePath = filePath
 	logFileName = fileName
@@ -64,7 +75,7 @@ func InitLoggerSystem(filePath string, fileName string) (context.CancelFunc, err
 	logFileIdx = 0
 	logCheckCD = 0
 	lastDayStr = time.Now().Format("2006-01-02")
-	logChan = make(chan *string, 1000)
+	logChan = make(chan *string, 100)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func(ctx context.Context) {
@@ -82,6 +93,8 @@ func InitLoggerSystem(filePath string, fileName string) (context.CancelFunc, err
 
 		}
 	}(ctx)
+
+	inited = true
 
 	return cancel, nil
 }
@@ -102,6 +115,7 @@ func CloseLoggerSystem() {
 		close(logChan)
 	}
 	ResetLoggerSystem()
+	inited = false
 }
 
 func GetSimpleLogger(name string) SimpleLogger {
